@@ -8,8 +8,7 @@ function result = posterior_prob(samp, datasets_cell, varargin)
 
 % 设置可选的输入参数
 ip = inputParser;
-validBool = @(x) islogical(x);
-addOptional(ip, 'isMNIST', false, validBool); %设置是否使用MNIST数据集
+addOptional(ip, 'isMNIST', false, @islogical); %设置是否使用MNIST数据集
 parse(ip, varargin{:});
 % 获取函数默认参数
 isMNSIT = ip.Results.isMNIST; %标志是否使用MNIST数据集

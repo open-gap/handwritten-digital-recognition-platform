@@ -28,7 +28,8 @@ data_dir = p.Results.data_dir; %数据集所在文件夹
 test_path = strcat(data_dir, 'user_test\');
 algorithm_result = []; %设置默认结果
 % 定义了算法名称列表
-algorithm_str = {'最邻近模板匹配法'; '最小错误率的贝叶斯分类器'};
+algorithm_str = {'最邻近模板匹配法'; '最小错误率的贝叶斯分类器'; ...
+    'Fisher线性判别器'};
 test_cell = get_test_datasets(shape, rate, false, test_path);%获取测试数据集
 test_size = length(test_cell{1, 1}); %读取的测试集样本数
 if ~isempty(test_cell) %获取结果测试数据集成功
@@ -78,6 +79,10 @@ switch index
     case 2 %使用最小错误率的贝叶斯法得到每个测试数据的分类类别和概率
         compare_cell = cellfun(@(x) lowest_error_bayes(x, datasets), ...
             pic_cell, 'UniformOutput', false);
+    case 3 %使用Fisher线性判别器得到每个测试数据的分类类别和概率
+        [~, W, W_0] = Fisher_LDA(pic_cell{1}, datasets_cell); %预先求W和W_0
+        compare_cell = cellfun(@(x) compare_Fisher_LDA(x, datasets_cell, ...
+            false, W, W_0), pic_cell, 'UniformOutput', false);
     otherwise
         disp_c('功能未开发完成或使用了异常的index索引值');
         compare_cell = {}; %异常情况返回空元胞数组
@@ -114,4 +119,13 @@ function result_mat = lowest_error_bayes(samp_pic, datasets_cell)
 class_prob = posterior_prob(samp_pic, datasets_cell); %计算样本后验概率
 [acc, class] = max(class_prob); %找到最大后验概率值和类别
 result_mat = [1 - acc / sum(class_prob, 1), class - 1]; %返回错误率和类别
+end
+
+%-------------------------------------------------------------------------%
+% 输入单张图片，计算获得的最小错误率和预测类别
+function result_mat = compare_Fisher_LDA(x, dataset_cell, isMNIST, W, W_0)
+distance = Fisher_LDA(x, dataset_cell, isMNIST, W, W_0); %求Fisher距离
+rate = exp(distance) / sum(exp(distance)); %类Softmax
+[acc, class] = max(rate); %获取最大概率值与对应的类别
+result_mat = [acc, class - 1]; %返回置信度和类别
 end

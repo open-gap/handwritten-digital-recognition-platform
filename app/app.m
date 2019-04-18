@@ -22,7 +22,7 @@ function varargout = app(varargin)
 
 % Edit the above text_linewidth to modify the response to help app
 
-% Last Modified by GUIDE v2.5 12-Apr-2019 17:25:45
+% Last Modified by GUIDE v2.5 18-Apr-2019 21:41:36
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -663,7 +663,33 @@ function Fisher_Callback(hObject, eventdata, handles)
 % hObject    handle to Fisher (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+global samp_rate samp_shape samp_pic flush_datasets data_path;
+% disp('使用Fisher线性分类器');
+datasets_cell = ...
+    get_user_datasets(samp_shape, samp_rate, flush_datasets, data_path);
+flush_datasets = false; %清除刷新数据集标志
+samp = ones(samp_shape, samp_shape); %设置默认结果图像
+if ~isempty(datasets_cell)
+    distance_mat = Fisher_LDA(samp_pic, datasets_cell, false); %计算距离
+    if isempty(distance_mat)
+        disp_c('尝试使用未开发功能异常，请使用用户数据集');
+    else
+        rate = exp(distance_mat) / sum(exp(distance_mat)); %类Softmax
+        [acc, class] = max(rate); %获取最大概率值与对应的类别
+        if class > 10 %类别为第11类
+            set(handles.class, 'String', 'Blank'); %设置标签为空白
+        else
+            set(handles.class, 'String', num2str(class - 1)); %显示类别标签
+        end
+        set(handles.accuracy, 'String', num2str(acc, 3)); %显示准确率度量
+        samp_row = mean(datasets_cell{class}, 1); %设置要绘制的类别均值图
+        samp = reshape(samp_row, samp_shape, samp_shape);
+    end
+axes(handles.pred_axes); %设置绘图区域为结果区
+draw_sample(samp); %绘图
+set(handles.pred_axes, 'XTick', []);
+set(handles.pred_axes, 'YTick', []);
+end
 
 % --------------------------------------------------------------------
 function Reward_Punishment_Callback(hObject, eventdata, handles)
@@ -701,18 +727,18 @@ if ~isempty(datasets_cell)
     post_prob = posterior_prob(samp_pic, datasets_cell, false);
     if isnan(post_prob)
         disp_c('尝试使用未开发功能异常，请使用用户数据集');
-        return; %发生异常退出程序
-    end
-    sum_prob = sum(post_prob); %计算样本概率P(x)
-    error_prob = 1 - post_prob ./ sum_prob; %计算错误概率
-    [min_error_prob, class] = min(error_prob); %找到最小错误概率值及类别
-    set(handles.accuracy, 'String', num2str(1 - min_error_prob, 3));
-    if class < 11
-        set(handles.class, 'String', num2str(class - 1));
-        prob_mat = mean(datasets_cell{class}, 1); %计算类别下所有样本均值
-        samp = reshape(prob_mat, [samp_shape, samp_shape]);
     else
-        set(handles.class, 'String', 'Blank');
+        sum_prob = sum(post_prob); %计算样本概率P(x)
+        error_prob = 1 - post_prob ./ sum_prob; %计算错误概率
+        [min_error_prob, class] = min(error_prob); %找到最小错误概率值及类别
+        set(handles.accuracy, 'String', num2str(1 - min_error_prob, 3));
+        if class < 11
+            set(handles.class, 'String', num2str(class - 1));
+            prob_mat = mean(datasets_cell{class}, 1); %计算类别下所有样本均值
+            samp = reshape(prob_mat, [samp_shape, samp_shape]);
+        else
+            set(handles.class, 'String', 'Blank');
+        end
     end
 axes(handles.pred_axes); %设置绘图区域为结果区
 draw_sample(samp); %绘图
@@ -905,7 +931,6 @@ function save_0_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 save_x(hObject, handles);
 
-
 % --------------------------------------------------------------------
 function Algorithm_Test_Callback(hObject, eventdata, handles)
 % hObject    handle to Algorithm_Test (see GCBO)
@@ -945,6 +970,15 @@ function Lowest_Error_Bayes_Test_Callback(hObject, eventdata, handles)
 % 最小错误率贝叶斯分类器算法测试
 global samp_shape samp_rate flush_datasets;
 algorithm_test(2, samp_shape, samp_rate, flush_datasets); %运行算法测试
+flush_datasets = false; %清除刷新数据集标志
+
+% --------------------------------------------------------------------
+function Fisher_Test_Callback(hObject, eventdata, handles)
+% hObject    handle to Fisher_Test (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global samp_shape samp_rate flush_datasets;
+algorithm_test(3, samp_shape, samp_rate, flush_datasets); %运行算法测试
 flush_datasets = false; %清除刷新数据集标志
 
 % --------------------------------------------------------------------
