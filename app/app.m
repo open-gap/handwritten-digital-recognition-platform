@@ -779,21 +779,28 @@ function Datasets_Overview_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 global data_path;
-selpath = uigetdir('..', '请选择数据集data文件夹'); %选择数据集文件夹
+if exist(data_path, 'dir') %判断默认地址文件夹是否存在选择默认地址
+    selpath = uigetdir(data_path, '请选择数据集data文件夹');%选择数据集文件夹
+else
+    selpath = uigetdir('..\', '请选择数据集data文件夹'); %选择数据集文件夹
+end
 if selpath == 0 %用户取消了选择文件夹
     try
         file_list = list_file(); %使用默认地址读取数据集文件
-        test_list = list_testsets_file();
+        [test_list, test_num] = list_testsets_file();
         selpath = data_path;
     catch
+        file_list = []; %发生错误，令数据集图像列表为空
         disp_c('指定的文件夹不存在或无法打开，请检查文件夹地址是否正确');
     end
 else
     try
         % 使用指定地址读取文件
         file_list = list_file(strcat(selpath, '\user_datasets\'));
-        test_list = list_testsets_file(strcat(selpath, '\user_test\'));
+        [test_list, test_num] = ...
+            list_testsets_file(strcat(selpath, '\user_test\'));
     catch
+        file_list = []; %发生错误，令数据集图像列表为空
         disp_c('尝试打开数据集文件夹出错，请检查文件夹地址是否正确');
     end
 end
@@ -803,11 +810,12 @@ if ~isempty(file_list)
     try
         class_num = reshape(cellfun(@length, file_list), 1, []);
         sum_num = sum(class_num);
-        str_ = strcat('0-9十个样本个数分别为：', num2str(class_num));
-        disp_c(str_);
+        % 打印输出读取结果
         disp_c(strcat('共读取训练集样本：', num2str(sum_num), '个'));
-        str_ = strcat('共读取到测试样本：', num2str(length(test_list)),'个');
-        disp_c(str_); %打印输出读取结果
+        disp_c(strcat('0-9十个样本个数分别为：', num2str(class_num)));
+        disp_c(strcat('共读取到测试样本：', ...
+            num2str(length(test_list)),'个'));
+        disp_c(strcat('0-9十个测试样本个数分别为：', num2str(test_num)));
     catch
         disp_c('读取文件夹成功，但统计样本数出错');
     end
