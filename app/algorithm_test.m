@@ -122,7 +122,7 @@ result_mat = [1 - acc / sum(class_prob, 1), class - 1]; %返回错误率和类别
 end
 
 %-------------------------------------------------------------------------%
-% 输入单张图片，计算获得的最小错误率和预测类别
+% 输入单张图片，计算Fisher线性分类器预测置信度和预测类别
 function result_mat = compare_Fisher_LDA(x, dataset_cell, isMNIST, W, W_0)
 distance = Fisher_LDA(x, dataset_cell, isMNIST, W, W_0); %求Fisher距离
 rate = exp(distance) / sum(exp(distance)); %类Softmax
