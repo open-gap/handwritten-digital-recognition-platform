@@ -31,7 +31,7 @@ else %使用用户测试数据集
     else
         tic; %开始读取文件计时
         %定义了缓存文件路径和名称
-        cache_dir = strcat(data_dir, '\cache\');
+        cache_dir = strcat(data_dir, 'cache\');
         file_name = sprintf('test_%d_%.3f.mat', shape, rate);
         mat_name = strcat(cache_dir, file_name);
         if ~exist(cache_dir, 'dir')
@@ -53,12 +53,12 @@ else %使用用户测试数据集
                 result_cell = {};
             else
                 class = arrayfun(@(x) str2double(x.name(1)), ...
-                    file_str(3: end)); %获取测试集样本类别，double型
+                    file_str(3: end));  %获取测试集样本类别，返回double型数组
                 samp = arrayfun(@(x) load_samp(x.name, data_dir, ...
                     shape, rate), file_str(3: end), ...
                     'UniformOutput', false); %获取图片数据并展平
-                leng = length(class) - 1; %排除最后的文件夹导致的多余元素
-                result_cell = {class(1:leng, 1),cell2mat(samp(1:leng, :))};
+                class(isnan(class)) = []; %删除非测试集图片文件带来的NaN结果
+                result_cell = {class,cell2mat(samp)};
                 save(mat_name, 'result_cell'); %保存结果到缓存文件中
                 time = toc; %结束获取数据集计时
                 str_ = strcat('新建测试集数据成功，共用时', ...
@@ -82,4 +82,5 @@ try
 catch
     return_mat = []; %发生错误返回空数组
 end
+% 程序结束
 end
