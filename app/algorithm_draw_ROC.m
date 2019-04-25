@@ -11,7 +11,8 @@ test_cell = mat2cell(testsets, ones(1, size(testsets, 1)));
 auc = NaN; %预定义要输出的AUC值
 
 % 定义了算法名称列表
-algorithm_str = {'最邻近模板匹配法'; '最小错误率的贝叶斯分类器'};
+algorithm_str = {'最邻近模板匹配法'; '最小错误率的贝叶斯分类器'; ...
+    'Fisher线性分类器'};
 % 根据算法索引选择算法执行预测
 switch i
     case 1 %获取最邻近模板匹配法估计结果
@@ -22,6 +23,10 @@ switch i
             datasets_cell), test_cell, 'UniformOutput', false));
         sum_prob = sum(post_prob, 2); %计算样本概率P(x)
         compare_mat = post_prob ./ sum_prob; %计算最终后验概率（正确率）
+    case 3 %获取Fisher线性分类器估计结果
+        [~, W, W_0] = Fisher_LDA(ones(1, size(testsets, 2)), datasets_cell);
+        compare_mat = cell2mat(cellfun(@(x) Fisher_LDA(x, datasets_cell, ...
+            W, W_0), test_cell, 'UniformOutput', false));
     otherwise
         compare_mat = []; %超出索引值返回空矩阵
 end

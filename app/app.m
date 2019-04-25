@@ -22,7 +22,7 @@ function varargout = app(varargin)
 
 % Edit the above text_linewidth to modify the response to help app
 
-% Last Modified by GUIDE v2.5 18-Apr-2019 21:41:36
+% Last Modified by GUIDE v2.5 25-Apr-2019 13:30:19
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -670,7 +670,7 @@ datasets_cell = ...
 flush_datasets = false; %清除刷新数据集标志
 samp = ones(samp_shape, samp_shape); %设置默认结果图像
 if ~isempty(datasets_cell)
-    distance_mat = Fisher_LDA(samp_pic, datasets_cell, false); %计算距离
+    distance_mat = Fisher_LDA(samp_pic, datasets_cell); %计算距离
     if isempty(distance_mat)
         disp_c('尝试使用未开发功能异常，请使用用户数据集');
     else
@@ -1050,4 +1050,31 @@ function User_Multi_ROC_LEB_Callback(hObject, eventdata, handles)
 global samp_shape samp_rate flush_datasets data_path;
 algorithm_draw_ROC(samp_shape, samp_rate, flush_datasets, data_path, ...
     2, true);
+flush_datasets = false; %清除刷新用户数据集标志
+
+% --------------------------------------------------------------------
+function Fisher_Curve_Callback(hObject, eventdata, handles)
+% hObject    handle to Fisher_Curve (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+% Fihser线性分类器曲线选项回调函数
+
+% --------------------------------------------------------------------
+function User_Single_ROC_Fisher_Callback(hObject, eventdata, handles)
+% hObject    handle to User_Single_ROC_Fisher (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global samp_shape samp_rate flush_datasets data_path;
+algorithm_draw_ROC(samp_shape, samp_rate, flush_datasets, data_path, ...
+    3, false);
+flush_datasets = false; %清除刷新用户数据集标志
+
+% --------------------------------------------------------------------
+function User_Multi_ROC_Fisher_Callback(hObject, eventdata, handles)
+% hObject    handle to User_Multi_ROC_Fisher (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+global samp_shape samp_rate flush_datasets data_path;
+algorithm_draw_ROC(samp_shape, samp_rate, flush_datasets, data_path, ...
+    3, true);
 flush_datasets = false; %清除刷新用户数据集标志

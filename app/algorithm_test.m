@@ -82,7 +82,7 @@ switch index
     case 3 %使用Fisher线性判别器得到每个测试数据的分类类别和概率
         [~, W, W_0] = Fisher_LDA(pic_cell{1}, datasets_cell); %预先求W和W_0
         compare_cell = cellfun(@(x) compare_Fisher_LDA(x, datasets_cell, ...
-            false, W, W_0), pic_cell, 'UniformOutput', false);
+            W, W_0, false), pic_cell, 'UniformOutput', false);
     otherwise
         disp_c('功能未开发完成或使用了异常的index索引值');
         compare_cell = {}; %异常情况返回空元胞数组
@@ -123,8 +123,8 @@ end
 
 %-------------------------------------------------------------------------%
 % 输入单张图片，计算Fisher线性分类器预测置信度和预测类别
-function result_mat = compare_Fisher_LDA(x, dataset_cell, isMNIST, W, W_0)
-distance = Fisher_LDA(x, dataset_cell, isMNIST, W, W_0); %求Fisher距离
+function result_mat = compare_Fisher_LDA(x, dataset_cell, W, W_0, isMNIST)
+distance = Fisher_LDA(x, dataset_cell, W, W_0, isMNIST); %求Fisher距离
 rate = exp(distance) / sum(exp(distance)); %类Softmax
 [acc, class] = max(rate); %获取最大概率值与对应的类别
 result_mat = [acc, class - 1]; %返回置信度和类别
