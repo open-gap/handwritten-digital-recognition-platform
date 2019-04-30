@@ -6,8 +6,8 @@ function [distance_mat, W, W_0] = Fisher_LDA(samp, datasets_cell, varargin)
 %       预计算得到的Nx1分界线大小矩阵，N代表类别，默认为空
 %       是否为MNIST数据集的bool可选参数，默认为false即用户数据集
 % 
-% 输出：第一个输出为Fisher判别器得到的距离列向量，距离最大值为预测
-%       类别；
+% 输出：第一个输出为输入样本不同类别在Fisher判别器得票数行向量，得
+%       票最大值为预测类别；
 %       第二个输出为分类器矩阵，每列代表一个分类器列向量；
 %       第三个输出为分界面距离，每行一个浮点数代表判断所使用的依据
 
@@ -66,7 +66,7 @@ if ~isMNSIT %使用用户数据集
         output_distance(class_n) = output_distance(class_n) + ...
             (distance((2 * class_n - i - 1) * i / 2) < 0); %求最后一个类别票
     end
-    distance_mat = output_distance; %投票结果输出
+    distance_mat = output_distance ./ (class_n - 1); %投票结果输出
 else
     disp_c('MNIST数据集相关功能未开发完成');
     [distance_mat, W, W_0] = deal([], [], []); %错误返回空数组

@@ -11,8 +11,7 @@ if length(result_cell) == 1 %绘制单条ROC曲线
    xlabel('False Positive Rate');
    ylabel('True Positive Rate');
    title(strcat('ROC Curve Of (AUC = ', num2str(auc), ' )'));
-   gird on;
-   hold off;
+   grid on;
 else %绘制多条ROC曲线
     auc = zeros(1, 10); %新建需要输出的AUC值数组
     figure('Name','多条ROC曲线','NumberTitle','off'); %新建窗口绘制图片结果
@@ -27,7 +26,7 @@ else %绘制多条ROC曲线
         xlabel('False Positive Rate');
         ylabel('True Positive Rate');
         title(strcat('ROC Curve Of (AUC = ', num2str(auc(i + 1)), ' )'));
-        gird on;
+        grid on;
     end
     figure('Name','多条ROC曲线2','NumberTitle','off'); %新建窗口绘制图片结果
     plot([0, 1], [0, 1], 'k--', 'LineWidth', 0.5); %斜对角参考线
@@ -44,7 +43,6 @@ else %绘制多条ROC曲线
         'UniformOutput', false);
     legend(['refer', legend_str], 'Location', 'SouthEast');
     grid on;
-    hold off;
 end
 % 程序结束
 end
